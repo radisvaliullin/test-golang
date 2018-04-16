@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"errors"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"time"
 )
@@ -13,7 +15,8 @@ func main() {
 
 	// run test servers
 	// servers accept our non blocking requests
-	startHTTPServ()
+	// startHTTPServ()
+	startTCPServ()
 
 	// init context variable
 	var (
@@ -22,7 +25,7 @@ func main() {
 	)
 
 	// setup context with timeout, after timeout expiration all request will abort
-	ctx, cancel = context.WithTimeout(context.Background(), time.Second*6)
+	ctx, cancel = context.WithTimeout(context.Background(), time.Second*3)
 	_ = cancel
 
 	// non blocking resp api req (to our test http server)
@@ -37,7 +40,7 @@ func main() {
 func restReq(ctx context.Context) ([]byte, error) {
 
 	// build request
-	req, err := http.NewRequest("GET", "http://localhost:7373/longlived", nil)
+	req, err := http.NewRequest("GET", "http://localhost:7374/longlived", nil)
 	if err != nil {
 		log.Println("restRec: new req err - ", err)
 		return nil, err
@@ -45,7 +48,8 @@ func restReq(ctx context.Context) ([]byte, error) {
 	req = req.WithContext(ctx)
 
 	// build client
-	cln := &http.Client{}
+	tr := &http.Transport{}
+	cln := &http.Client{Transport: tr}
 
 	// do req
 	resp, err := cln.Do(req)
@@ -74,7 +78,7 @@ func startHTTPServ() {
 	// long-lived handler
 	mux.HandleFunc("/longlived", func(w http.ResponseWriter, r *http.Request) {
 		// long lived, delay
-		time.Sleep(time.Second * 5)
+		time.Sleep(time.Second * 60)
 		w.Write([]byte("Long lived request"))
 	})
 
@@ -85,4 +89,68 @@ func startHTTPServ() {
 		}
 	}()
 
+}
+
+// simple tcp server (with http handler)
+func startTCPServ() {
+
+	// listen
+	ln, err := net.Listen("tcp", ":7374")
+	if err != nil {
+		log.Fatal("tcp srv listen: err - ", err)
+	}
+
+	// accept handler
+	go func() {
+
+		// time.Sleep(time.Second * 5)
+
+		for {
+
+			// accept
+			conn, err := ln.Accept()
+			if err != nil {
+				log.Fatal("tcp srv accept: err - ", err)
+			}
+
+			// connection handler
+			go connHandler(conn)
+		}
+	}()
+}
+
+// tcp server, http handler
+func connHandler(conn net.Conn) {
+	defer conn.Close()
+
+	// read request
+	buff := make([]byte, 1024)
+
+	n, err := conn.Read(buff)
+	if err != nil {
+		log.Printf("srv: conn - %v; err - %v; buff - %v",
+			conn.RemoteAddr(), err, string(buff[:n]))
+		return
+	}
+
+	// send response
+	rawResp := "HTTP/1.1 200 OK\r\n" +
+		"Content-Length: 6\r\n" +
+		"Content-Type: text/plain; charset=utf-8\r\n" +
+		"Date: Wed, 19 Jul 1972 19:00:00 GMT\r\n\r\n" +
+		"Hello.\r\n"
+	resp := []byte(rawResp)
+
+	// long-lived delay
+	time.Sleep(time.Second * 1)
+
+	// write response
+	n, err = conn.Write(resp)
+	if err != nil {
+		log.Printf("srv: conn - %v; write resp err - %v", conn.RemoteAddr(), err)
+		return
+	} else if n != len(resp) {
+		log.Printf("srv: conn - %v; write resp err - %v",
+			conn.RemoteAddr(), errors.New("write resp n != len(writeData)"))
+	}
 }
