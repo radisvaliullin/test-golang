@@ -8,6 +8,7 @@ import (
 func main() {
 
 	now := time.Now()
-
 	fmt.Printf("time - %v\n", now.Format(time.RFC3339))
+	fmt.Printf("time - %v\n", now.Format(time.RFC3339))
+
 }
