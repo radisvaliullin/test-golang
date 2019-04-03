@@ -29,11 +29,15 @@ func Trace3() {
 	ci := runtime.Callers(0, traceFuncs)
 	traceFuncs = traceFuncs[:ci]
 
-	for i := 0; i < ci; i++ {
-		cf := runtime.FuncForPC(traceFuncs[i])
-		file, line := cf.FileLine(traceFuncs[i])
-		log.Printf("trace: %v : %v : %v", cf.Name(), file, line)
-	}
+	// for i := 0; i < ci; i++ {
+	// 	cf := runtime.FuncForPC(traceFuncs[i])
+	// 	file, line := cf.FileLine(traceFuncs[i])
+	// 	log.Printf("trace: %v : %v : %v", cf.Name(), file, line)
+	// }
 
-	// log.Printf("buf - %v", string(buf))
+	frames := runtime.CallersFrames(traceFuncs)
+
+	for frame, more := frames.Next(); more; frame, more = frames.Next() {
+		log.Printf("frame func: %v ; file - %v ; line - %v", frame.Function, frame.File, frame.Line)
+	}
 }
