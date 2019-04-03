@@ -21,3 +21,19 @@ func Trace2() {
 
 	log.Printf("buf - %v", string(buf))
 }
+
+func Trace3() {
+	log.Print("trace3")
+
+	traceFuncs := make([]uintptr, 50)
+	ci := runtime.Callers(0, traceFuncs)
+	traceFuncs = traceFuncs[:ci]
+
+	for i := 0; i < ci; i++ {
+		cf := runtime.FuncForPC(traceFuncs[i])
+		file, line := cf.FileLine(cf.Entry())
+		log.Printf("trace: %v : %v : %v", cf.Name(), file, line)
+	}
+
+	// log.Printf("buf - %v", string(buf))
+}

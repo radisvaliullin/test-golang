@@ -8,8 +8,9 @@ import (
 
 func main() {
 
-	trace.Trace()
-	go func() { trace.Trace2() }()
+	// trace.Trace()
+	// go func() { trace.Trace2() }()
+	go func() { trace.Trace3() }()
 
 	for {
 	}
