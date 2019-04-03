@@ -9,6 +9,9 @@ import (
 func main() {
 
 	trace.Trace()
+	go func() { trace.Trace2() }()
 
+	for {
+	}
 	log.Print("end")
 }
