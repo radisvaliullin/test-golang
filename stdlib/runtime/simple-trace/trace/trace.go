@@ -31,7 +31,7 @@ func Trace3() {
 
 	for i := 0; i < ci; i++ {
 		cf := runtime.FuncForPC(traceFuncs[i])
-		file, line := cf.FileLine(cf.Entry())
+		file, line := cf.FileLine(traceFuncs[i])
 		log.Printf("trace: %v : %v : %v", cf.Name(), file, line)
 	}
 
