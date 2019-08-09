@@ -1,4 +1,4 @@
-module github.com/radisvaliullin/test-golang
+module github.com/radisvaliullin/test-golang/v2
 
 go 1.12
 
