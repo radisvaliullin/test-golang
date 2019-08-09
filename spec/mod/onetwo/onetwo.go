@@ -9,3 +9,8 @@ func One() string {
 func Two() string {
 	return "two"
 }
+
+// OneTwo -
+func OneTwo() string {
+	return "onetwo"
+}
