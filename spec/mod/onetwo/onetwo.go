@@ -2,12 +2,12 @@ package onetwo
 
 // One -
 func One() string {
-	return "one"
+	return "oneone"
 }
 
 // Two -
 func Two() string {
-	return "two"
+	return "twotwo"
 }
 
 // OneTwo -
