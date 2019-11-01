@@ -12,9 +12,11 @@ func main() {
 	example := struct {
 		IntNull  *int `json:"int_null"`
 		IntNull2 *int `json:"int_null_2"`
+		IntNull3 *int `json:"int_null_3,omitempty"`
 	}{
 		IntNull:  &i,
 		IntNull2: nil,
+		IntNull3: nil,
 	}
 
 	bt, err := json.Marshal(&example)
