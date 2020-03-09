@@ -10,3 +10,6 @@
 
 # temp
 /temp/*
+
+#bin
+**/bin/
