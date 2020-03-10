@@ -19,7 +19,7 @@ var (
 			Name: "hd_errors_total",
 			Help: "Number of hard-disk errors.",
 		},
-		[]string{"device"},
+		[]string{"device", "id"},
 	)
 )
 
@@ -31,7 +31,8 @@ func init() {
 
 func main() {
 	cpuTemp.Set(65.3)
-	hdFailures.With(prometheus.Labels{"device":"/dev/sda"}).Inc()
+	hdFailures.With(prometheus.Labels{"device": "/dev/sda", "id": "1234"}).Inc()
+	hdFailures.With(prometheus.Labels{"device": "/dev/sda", "id": "2222"}).Inc()
 
 	// The Handler function provides a default handler to expose metrics
 	// via an HTTP server. "/metrics" is the usual endpoint for that.
