@@ -98,21 +98,39 @@ func main() {
 
 	// add other types
 
-	// Histrogram
+	// rand
+	rndSrc := rand.NewSource(time.Now().UnixNano())
+	rnd := rand.New(rndSrc)
+	var i int
+
+	// // Histrogram
 	temps := prometheus.NewHistogram(prometheus.HistogramOpts{
 		Name:    "pond_temperature_celsius",
 		Help:    "The temperature of the frog pond.", // Sorry, we can't measure how badly it smells.
 		Buckets: prometheus.LinearBuckets(20, 5, 5),  // 5 buckets, each 5 centigrade wide.
 	})
 	reg.MustRegister(temps)
-	rndSrc := rand.NewSource(time.Now().UnixNano())
-	rnd := rand.New(rndSrc)
-	var i int
 	go func() {
 		// Simulate some observations.
 		for {
 			i = rnd.Intn(1000)
 			temps.Observe(30 + math.Floor(120*math.Sin(float64(i)*0.1))/10)
+			time.Sleep(time.Millisecond * 50)
+		}
+	}()
+
+	// Summaries
+	tempsSum := prometheus.NewSummary(prometheus.SummaryOpts{
+		Name:       "pond_temperature_celsius2",
+		Help:       "The temperature of the frog pond 2.",
+		Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
+	})
+	reg.MustRegister(tempsSum)
+	go func() {
+		// Simulate some observations.
+		for {
+			i = rnd.Intn(1000)
+			tempsSum.Observe(30 + math.Floor(120*math.Sin(float64(i)*0.1))/10)
 			time.Sleep(time.Millisecond * 50)
 		}
 	}()
