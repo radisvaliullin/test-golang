@@ -1,4 +1,4 @@
-package srv
+package srvcln
 
 import (
 	"bufio"
@@ -17,7 +17,7 @@ type Srv struct {
 	connCnt int
 }
 
-func (s *Srv) run() {
+func (s *Srv) Run() {
 
 	ln, err := net.Listen("tcp", s.Addr)
 	if err != nil {
@@ -47,7 +47,7 @@ func connHandler(conn net.Conn, wg *sync.WaitGroup) {
 	for {
 		line, err := bufio.NewReader(conn).ReadString('\n')
 		if err != nil {
-			log.Printf("srv: conn: read line err: %v", err)
+			// log.Printf("srv: conn: read line err: %v", err)
 			return
 		}
 		if strings.TrimSpace(line) == "stop" {

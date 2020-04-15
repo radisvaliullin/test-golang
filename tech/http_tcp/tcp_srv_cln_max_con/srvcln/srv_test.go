@@ -1,4 +1,4 @@
-package srv
+package srvcln
 
 import (
 	"fmt"
@@ -15,36 +15,45 @@ func Test_Srv(t *testing.T) {
 	srv := Srv{Addr: srvAddr}
 
 	go func() {
-		srv.run()
+		srv.Run()
 	}()
 
-	dl := net.Dialer{Timeout: time.Second * 20}
+	dl := net.Dialer{Timeout: time.Second * 5}
 	wg := sync.WaitGroup{}
-	gcnt := 4098
-	for i := 0; i < gcnt; i++ {
+	connCnt := safeCounter{}
+	go func() {
+		for {
+			fmt.Printf("COUNT of CONN: %v\n", connCnt.Cnt())
+			time.Sleep(time.Second)
+		}
+	}()
+	clnNum := 10000
+	for i := 0; i < clnNum; i++ {
 		wg.Add(1)
+		connCnt.Inc()
 		go func() {
 			defer wg.Done()
+			defer connCnt.Dec()
 			conn, err := dl.Dial("tcp", srvAddr)
 			if err != nil {
-				fmt.Printf("dial err: %v", err)
+				fmt.Printf("dial err: %v\n", err)
 				return
 			}
 			defer conn.Close()
 			_, err = conn.Write([]byte("hello"))
 			if err != nil {
-				fmt.Printf("write to conn err: %v", err)
+				// fmt.Printf("write to conn err: %v\n", err)
 				return
 			}
-			time.Sleep(time.Second * 3)
+			time.Sleep(time.Second * 15)
 			_, err = conn.Write([]byte("stop"))
 			if err != nil {
-				fmt.Printf("write to conn err: %v", err)
+				// fmt.Printf("write to conn err: %v\n", err)
 				return
 			}
 		}()
 	}
-	fmt.Print("CLIEN LAUNCHED")
+	fmt.Println("CLIEN LAUNCHED")
 
 	wg.Wait()
 	srv.wg.Wait()
