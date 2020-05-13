@@ -31,26 +31,28 @@ func (v *ab) b() {
 
 func main() {
 
-	var i iab
+	var viab iab
 
-	i = &ab{v: 4}
-	log.Printf("iab is %+v", i)
+	vab := ab{v: 4}
+	vab2 := ab{v: 44}
+	viab = &vab
+	log.Printf("viab is %+v", viab)
 
-	if v, ok := i.(ia); ok {
+	if v, ok := viab.(ia); ok {
 		log.Printf("i is ia")
 		log.Printf("i is ia, assert value type %T", v)
 	} else {
 		log.Printf("i is NOT ia")
 	}
 
-	if v, ok := i.(iabc); ok {
+	if v, ok := viab.(iabc); ok {
 		log.Printf("i is iabc")
 		log.Printf("i is iabc, assert value type %T", v)
 	} else {
 		log.Printf("i is NOT iabc")
 	}
 
-	if v, ok := i.(*ab); ok {
+	if v, ok := viab.(*ab); ok {
 		log.Printf("i is *ab")
 		log.Printf("i is *ab, assert value type %T", v)
 	} else {
