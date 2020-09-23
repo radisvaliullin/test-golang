@@ -34,7 +34,7 @@ func main() {
 	var viab iab
 
 	vab := ab{v: 4}
-	vab2 := ab{v: 44}
+	// vab2 := ab{v: 44}
 	viab = &vab
 	log.Printf("viab is %+v", viab)
 
