@@ -17,7 +17,7 @@ func main() {
 	mux.HandleFunc("/test", func(w http.ResponseWriter, r *http.Request) {
 		id := id + 1
 		fmt.Println("ID: ", id)
-		time.Sleep(time.Second * 10)
+		time.Sleep(time.Second * 600)
 		fmt.Println("end ID: ", id)
 		_, err := w.Write([]byte(fmt.Sprintf("done. ID %v", id)))
 		if err != nil {
@@ -26,8 +26,10 @@ func main() {
 	})
 
 	srv := http.Server{
-		Addr:    "0.0.0.0:7337",
-		Handler: mux,
+		Addr:         "0.0.0.0:7337",
+		Handler:      mux,
+		ReadTimeout:  time.Second * 15,
+		WriteTimeout: time.Second * 15,
 	}
 
 	go func() {
@@ -46,6 +48,7 @@ func main() {
 			resp, err := http.Get("http://0.0.0.0:7337/test")
 			if err != nil {
 				fmt.Println("get err ", err)
+				return
 			}
 			defer resp.Body.Close()
 			body, err := ioutil.ReadAll(resp.Body)
@@ -63,6 +66,7 @@ func main() {
 		fmt.Println("shutdonw start")
 		if err := srv.Shutdown(context.Background()); err != nil {
 			fmt.Println("shutdown err ", err)
+			return
 		}
 		fmt.Println("shutdonw end")
 	}()
