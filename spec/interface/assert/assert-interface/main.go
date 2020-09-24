@@ -66,4 +66,15 @@ func main() {
 	// } else {
 	// 	log.Printf("i is NOT ab")
 	// }
+
+	var i interface{}
+
+	i = "qwerty"
+
+	s, ok := i.(string)
+	if ok {
+		log.Println("is string ", ok, s)
+	} else {
+		log.Println("is not string ")
+	}
 }
