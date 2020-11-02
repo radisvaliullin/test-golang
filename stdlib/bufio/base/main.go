@@ -20,7 +20,14 @@ func main() {
 	bio := bufio.NewReaderSize(br, 17)
 
 	// read bytes
-	b2, err := bio.ReadBytes(18)
+	b2, err := bio.ReadSlice(16)
+	if err != nil {
+		fmt.Println("read bytes err:", err)
+		return
+	}
+	fmt.Println("read bytes: ", b2)
+	// read bytes
+	b2, err = bio.ReadSlice(32)
 	if err != nil {
 		fmt.Println("read bytes err:", err)
 		return
