@@ -17,8 +17,10 @@ func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	srvNextSig := make(chan struct{}, 1)
-	toChan := make(chan time.Time, 1)
+	srvReadDone := make(chan struct{})
+	srvNextSig := make(chan struct{})
+	toChan := make(chan time.Time)
+	toChanDone := make(chan struct{})
 
 	ln, err := net.Listen("tcp", srvAddr)
 	if err != nil {
@@ -59,6 +61,25 @@ func main() {
 					}
 				}()
 
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+
+					var to time.Time
+					for {
+						select {
+						case <-ctx.Done():
+							return
+						case to = <-toChan:
+						}
+						if err := conn.SetDeadline(to); err != nil {
+							fmt.Println("set deadline 1, err:", err)
+							return
+						}
+						toChanDone <- struct{}{}
+					}
+				}()
+
 				buff := make([]byte, 1024)
 				for {
 
@@ -68,11 +89,7 @@ func main() {
 						return
 					}
 
-					to := <-toChan
-					if err := conn.SetDeadline(to); err != nil {
-						fmt.Println("set deadline 1, err:", err)
-						return
-					}
+					fmt.Println("start read")
 					n, err := conn.Read(buff)
 					if err != nil {
 						if err, ok := err.(net.Error); ok && err.Timeout() {
@@ -83,14 +100,15 @@ func main() {
 						}
 					}
 					fmt.Println("handler read bytes: ", buff[:n])
-					srvNextSig <- struct{}{}
+					srvReadDone <- struct{}{}
+					<-srvNextSig
 				}
 
 			}(conn)
 		}
 	}()
 
-	time.Sleep(time.Millisecond * 1000)
+	time.Sleep(time.Millisecond * 500)
 
 	conn, err := net.Dial("tcp", srvAddr)
 	if err != nil {
@@ -98,20 +116,31 @@ func main() {
 		return
 	}
 
+	time.Sleep(time.Millisecond * 500)
+
+	fmt.Println("set deadline")
+	toChan <- time.Now()
+	<-toChanDone
+	<-srvReadDone
+	fmt.Println("set deadline")
+	toChan <- time.Now().Add(time.Second * 15)
+	<-toChanDone
+	srvNextSig <- struct{}{}
+
+	fmt.Println("write message")
 	_, err = conn.Write([]byte("qwerty"))
 	if err != nil {
 		fmt.Println("client write err:", err)
 		return
 	}
-	toChan <- time.Now()
-	<-srvNextSig
-	toChan <- time.Now().Add(time.Second * 15)
+	<-srvReadDone
 
 	if err := conn.Close(); err != nil {
 		fmt.Println("client conn close:", err)
 		return
 	}
 	cancel()
+	srvNextSig <- struct{}{}
 
 	wg.Wait()
 }
