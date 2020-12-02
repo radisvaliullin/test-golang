@@ -18,7 +18,9 @@ func Test_Srv(t *testing.T) {
 		srv.Run()
 	}()
 
-	dl := net.Dialer{Timeout: time.Second * 5}
+	time.Sleep(time.Second * 1)
+
+	dl := net.Dialer{Timeout: time.Second * 10}
 	wg := sync.WaitGroup{}
 	connCnt := safeCounter{}
 	go func() {
@@ -27,7 +29,7 @@ func Test_Srv(t *testing.T) {
 			time.Sleep(time.Second)
 		}
 	}()
-	clnNum := 10000
+	clnNum := 25000
 	for i := 0; i < clnNum; i++ {
 		wg.Add(1)
 		connCnt.Inc()
@@ -45,7 +47,7 @@ func Test_Srv(t *testing.T) {
 				// fmt.Printf("write to conn err: %v\n", err)
 				return
 			}
-			time.Sleep(time.Second * 15)
+			time.Sleep(time.Second * 10)
 			_, err = conn.Write([]byte("stop"))
 			if err != nil {
 				// fmt.Printf("write to conn err: %v\n", err)
