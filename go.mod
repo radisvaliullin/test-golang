@@ -11,6 +11,7 @@ require (
 	github.com/lib/pq v1.2.0
 	github.com/mediocregopher/radix.v2 v0.0.0-20181115013041-b67df6e626f9
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/pkg/profile v1.5.0
 	github.com/radisvaliullin/test-golang/v2 v2.0.0-20190916230720-453d5ca72eb1
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v0.0.5
